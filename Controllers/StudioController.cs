@@ -18,7 +18,7 @@ namespace DVDMovie.Controllers
         {
             return context.Studios;
         }
-        
+
         [HttpPost]
         public IActionResult CreateStudio([FromBody]StudioData sdata)
         {
@@ -28,6 +28,23 @@ namespace DVDMovie.Controllers
                 context.Add(s);
                 context.SaveChanges();
                 return Ok(s.StudioId);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult ReplaceStudio(long id,[FromBody] StudioData sdata)
+        {
+            if (ModelState.IsValid)
+            {
+                Studio s = sdata.Studio;
+                s.StudioId = id;
+                context.Update(s);
+                context.SaveChanges();
+                return Ok();
             }
             else
             {

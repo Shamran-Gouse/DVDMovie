@@ -15,6 +15,10 @@ export class Repository {
   studios: Studio[] = [];
   private filterObject = new Filter();
 
+  get filter(): Filter {
+    return this.filterObject;
+  }
+
   constructor(private http: HttpClient) {
     // this.filter.category = "drama";
     this.filter.related = true;
@@ -72,7 +76,30 @@ export class Repository {
       });
   }
 
-  get filter(): Filter {
-    return this.filterObject;
+  replaceMovie(mov: Movie) {
+    let data = {
+      image:mov.image, name: mov.name, category: mov.category,
+      description: mov.description, price: mov.price,
+      studio: mov.studio ? mov.studio.studioId : 0
+    };
+    this.http.put(moviesUrl + "/" + mov.movieId, data)
+      .subscribe(response => this.getMovies());
   }
+
+  replaceStudio(stu: Studio) {
+    let data = {
+      name: stu.name, city: stu.city, state: stu.state
+    };
+    this.http.put(studiosUrl + "/" + stu.studioId, data)
+      .subscribe(response => this.getMovies());
+  }
+
+  updateMovie(id: number, changes: Map<string, any>) {
+    let patch = [];
+    changes.forEach((value, key) =>
+    patch.push({ op: "replace", path: key, value: value }));
+    this.http.patch(moviesUrl + "/" + id, patch)
+    .subscribe(response => this.getMovies());
+  }
+
 }

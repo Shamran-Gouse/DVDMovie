@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using DVDMovie.Models;
 using Microsoft.EntityFrameworkCore;
 using DVDMovie.Models.BindingTargets;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace DVDMovie.Controllers
 {
@@ -90,7 +91,7 @@ namespace DVDMovie.Controllers
                 return query;
             }
         }
-        
+
         [HttpPost]
         public IActionResult CreateMovie([FromBody] MovieData mdata)
         {
@@ -104,6 +105,50 @@ namespace DVDMovie.Controllers
                 context.Add(m);
                 context.SaveChanges();
                 return Ok(m.MovieId);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult ReplaceMovie(long id, [FromBody] MovieData mData)
+        {
+            if (ModelState.IsValid)
+            {
+                Movie m = mData.Movie;
+                m.MovieId = id;
+                if (m.Studio != null && m.Studio.StudioId != 0)
+                {
+                    context.Attach(m.Studio);
+                }
+                context.Update(m);
+                context.SaveChanges();
+                return Ok();
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
+        }
+
+        [HttpPatch("{id}")]
+        public IActionResult UpdateMovie(long id,[FromBody]JsonPatchDocument<MovieData> patch)
+        {
+            Movie movie = context.Movies
+            .Include(m => m.Studio)
+            .First(m => m.MovieId == id);
+            MovieData mdata = new MovieData { Movie = movie };
+            patch.ApplyTo(mdata, ModelState);
+            if (ModelState.IsValid && TryValidateModel(mdata))
+            {
+                if (movie.Studio != null && movie.Studio.StudioId != 0)
+                {
+                    context.Attach(movie.Studio);
+                }
+                context.SaveChanges();
+                return Ok(movie);
             }
             else
             {
