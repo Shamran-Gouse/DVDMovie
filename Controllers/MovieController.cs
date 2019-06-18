@@ -134,7 +134,7 @@ namespace DVDMovie.Controllers
         }
 
         [HttpPatch("{id}")]
-        public IActionResult UpdateMovie(long id,[FromBody]JsonPatchDocument<MovieData> patch)
+        public IActionResult UpdateMovie(long id, [FromBody]JsonPatchDocument<MovieData> patch)
         {
             Movie movie = context.Movies
             .Include(m => m.Studio)
@@ -154,6 +154,14 @@ namespace DVDMovie.Controllers
             {
                 return BadRequest(ModelState);
             }
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteMovie(long id)
+        {
+            context.Movies.Remove(new Movie { MovieId = id });
+            context.SaveChanges();
+            return Ok(id);
         }
     }
 }

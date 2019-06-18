@@ -78,7 +78,7 @@ export class Repository {
 
   replaceMovie(mov: Movie) {
     let data = {
-      image:mov.image, name: mov.name, category: mov.category,
+      image: mov.image, name: mov.name, category: mov.category,
       description: mov.description, price: mov.price,
       studio: mov.studio ? mov.studio.studioId : 0
     };
@@ -97,9 +97,22 @@ export class Repository {
   updateMovie(id: number, changes: Map<string, any>) {
     let patch = [];
     changes.forEach((value, key) =>
-    patch.push({ op: "replace", path: key, value: value }));
+      patch.push({ op: "replace", path: key, value: value }));
     this.http.patch(moviesUrl + "/" + id, patch)
-    .subscribe(response => this.getMovies());
+      .subscribe(response => this.getMovies());
+  }
+
+  deleteMovie(id: number) {
+    this.http.delete(moviesUrl + "/" + id)
+      .subscribe(response => this.getMovies());
+  }
+
+  deleteStudio(id: number) {
+    this.http.delete(studiosUrl + "/" + id)
+      .subscribe(response => {
+        this.getMovies();
+        this.getStudios();
+      });
   }
 
 }

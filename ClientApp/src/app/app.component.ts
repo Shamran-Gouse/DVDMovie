@@ -53,4 +53,12 @@ export class AppComponent {
     changes.set('studio', null);
     this.repo.updateMovie(1, changes);
   }
+
+  deleteMovie() {
+    this.repo.deleteMovie(1);
+  }
+
+  deleteStudio() {
+    this.repo.deleteStudio(2);
+  }
 }
