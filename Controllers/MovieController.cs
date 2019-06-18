@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using DVDMovie.Models;
 using Microsoft.EntityFrameworkCore;
+using DVDMovie.Models.BindingTargets;
 
 namespace DVDMovie.Controllers
 {
@@ -20,11 +21,11 @@ namespace DVDMovie.Controllers
         [HttpGet("{id}")]
         public Movie GetMovie(long id)
         {
+            //System.Threading.Thread.Sleep(5000);
             Movie result = context.Movies
-                   .Include(m => m.Studio).ThenInclude(s => s.Movies)
-                   .Include(m => m.Ratings)
-                   .FirstOrDefault(m => m.MovieId == id);
-
+                    .Include(m => m.Studio).ThenInclude(s => s.Movies)
+                    .Include(m => m.Ratings)
+                    .FirstOrDefault(m => m.MovieId == id);
             if (result != null)
             {
                 if (result.Studio != null)
@@ -48,13 +49,13 @@ namespace DVDMovie.Controllers
                 }
             }
             return result;
+
         }
 
         [HttpGet]
         public IEnumerable<Movie> GetMovies(string category, string search, bool related = false)
         {
             IQueryable<Movie> query = context.Movies;
-            
             if (!string.IsNullOrWhiteSpace(category))
             {
                 string catLower = category.ToLower();
@@ -87,6 +88,26 @@ namespace DVDMovie.Controllers
             else
             {
                 return query;
+            }
+        }
+        
+        [HttpPost]
+        public IActionResult CreateMovie([FromBody] MovieData mdata)
+        {
+            if (ModelState.IsValid)
+            {
+                Movie m = mdata.Movie;
+                if (m.Studio != null && m.Studio.StudioId != 0)
+                {
+                    context.Attach(m.Studio);
+                }
+                context.Add(m);
+                context.SaveChanges();
+                return Ok(m.MovieId);
+            }
+            else
+            {
+                return BadRequest(ModelState);
             }
         }
     }
