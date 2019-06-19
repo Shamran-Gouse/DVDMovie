@@ -1,3 +1,4 @@
+import { MovieDetailComponent } from './structure/movieDetail.component';
 import { CategoryFilterComponent } from './structure/categoryFilter.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
@@ -11,7 +12,8 @@ import { MovieTableComponent } from './structure/movieTable.component';
   declarations: [
     AppComponent,
     MovieTableComponent,
-    CategoryFilterComponent
+    CategoryFilterComponent,
+    MovieDetailComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
