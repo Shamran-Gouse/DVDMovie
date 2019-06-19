@@ -1,15 +1,24 @@
 import { Component } from '@angular/core';
 import { Repository } from '../models/repository';
 import { Movie } from '../models/movie.model';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
-// tslint:disable-next-line: component-selector
-    selector: 'movie-detail',
-    templateUrl: 'movieDetail.component.html'
+  selector: "movie-detail",
+  templateUrl: 'movieDetail.component.html'
 })
 export class MovieDetailComponent {
-    constructor(private repo: Repository) { }
-    get movie(): Movie {
-        return this.repo.movie;
+
+  constructor(private repo: Repository, router: Router, activeRoute: ActivatedRoute) {
+    const id = Number.parseInt(activeRoute.snapshot.params['id']);
+    if (id) {
+      this.repo.getMovie(id);
+    } else {
+      router.navigateByUrl('/');
     }
+  }
+
+  get movie(): Movie {
+    return this.repo.movie;
+  }
 }
