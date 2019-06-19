@@ -1,7 +1,7 @@
 import { Movie } from "./movie.model";
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
-import { Filter } from "./configClasses.repository";
+import { Filter, Pagination } from "./configClasses.repository";
 import { Studio } from "./studio.model";
 
 const studiosUrl = "/api/studios";
@@ -9,6 +9,8 @@ const moviesUrl = "/api/movies";
 @Injectable()
 export class Repository {
   private filterObject = new Filter();
+  private paginationObject = new Pagination();
+
   constructor(private http: HttpClient) {
     //this.filter.category = "drama";
     this.filter.related = true;
@@ -33,6 +35,7 @@ export class Repository {
       .subscribe(response => {
         this.movies = response.data;
         this.categories = response.categories;
+        this.pagination.currentPage = 1;
       });
 
   }
@@ -112,5 +115,8 @@ export class Repository {
 
   get filter(): Filter {
     return this.filterObject;
+  }
+  get pagination(): Pagination {
+    return this.paginationObject;
   }
 }
