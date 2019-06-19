@@ -1,55 +1,48 @@
-import { Movie } from './movie.model';
+import { Movie } from "./movie.model";
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
-import { Filter } from './configClasses.repository';
-import { Studio } from './studio.model';
+import { Filter } from "./configClasses.repository";
+import { Studio } from "./studio.model";
 
-const studiosUrl = '/api/studios';
-const moviesUrl = '/api/movies';
-
+const studiosUrl = "/api/studios";
+const moviesUrl = "/api/movies";
 @Injectable()
 export class Repository {
-
-  movie: Movie;
-  movies: Movie[];
-  studios: Studio[] = [];
   private filterObject = new Filter();
-
-  get filter(): Filter {
-    return this.filterObject;
-  }
-
   constructor(private http: HttpClient) {
-    // this.filter.category = "drama";
+    //this.filter.category = "drama";
     this.filter.related = true;
     this.getMovies();
   }
-
   getMovie(id: number) {
-    this.http.get(moviesUrl + '/' + id)
-      .subscribe(response => { this.movie = response; });
+    //console.log("Movie Data Requested");
+    this.http.get(moviesUrl + "/" + id)
+      .subscribe(response => { this.movie = response });
   }
-
   getMovies(related = false) {
-    let url = moviesUrl + '?related=' + this.filter.related;
+    let url = moviesUrl + "?related=" + this.filter.related;
     if (this.filter.category) {
-      url += '&category=' + this.filter.category;
+      url += "&category=" + this.filter.category;
     }
     if (this.filter.search) {
-      url += '&search=' + this.filter.search;
+      url += "&search=" + this.filter.search;
     }
 
-    this.http.get<Movie[]>(url)
-      .subscribe(response => this.movies = response);
+    url += "&metadata=true";
+    this.http.get<any>(url)
+      .subscribe(response => {
+        this.movies = response.data;
+        this.categories = response.categories;
+      });
+
   }
 
   getStudios() {
     this.http.get<Studio[]>(studiosUrl)
       .subscribe(response => this.studios = response);
   }
-
   createMovie(mov: Movie) {
-    const data = {
+    let data = {
       Image: mov.image, name: mov.name, category: mov.category,
       description: mov.description, price: mov.price,
       studio: mov.studio ? mov.studio.studioId : 0
@@ -60,9 +53,8 @@ export class Repository {
         this.movies.push(mov);
       });
   }
-
   createMovieAndStudio(mov: Movie, stu: Studio) {
-    const data = {
+    let data = {
       name: stu.name, city: stu.city, state: stu.state
     };
     this.http.post<number>(studiosUrl, data)
@@ -75,7 +67,6 @@ export class Repository {
         }
       });
   }
-
   replaceMovie(mov: Movie) {
     let data = {
       image: mov.image, name: mov.name, category: mov.category,
@@ -85,7 +76,6 @@ export class Repository {
     this.http.put(moviesUrl + "/" + mov.movieId, data)
       .subscribe(response => this.getMovies());
   }
-
   replaceStudio(stu: Studio) {
     let data = {
       name: stu.name, city: stu.city, state: stu.state
@@ -93,7 +83,6 @@ export class Repository {
     this.http.put(studiosUrl + "/" + stu.studioId, data)
       .subscribe(response => this.getMovies());
   }
-
   updateMovie(id: number, changes: Map<string, any>) {
     let patch = [];
     changes.forEach((value, key) =>
@@ -101,12 +90,10 @@ export class Repository {
     this.http.patch(moviesUrl + "/" + id, patch)
       .subscribe(response => this.getMovies());
   }
-
   deleteMovie(id: number) {
     this.http.delete(moviesUrl + "/" + id)
       .subscribe(response => this.getMovies());
   }
-
   deleteStudio(id: number) {
     this.http.delete(studiosUrl + "/" + id)
       .subscribe(response => {
@@ -115,4 +102,15 @@ export class Repository {
       });
   }
 
+
+
+
+  movie: Movie;
+  movies: Movie[];
+  studios: Studio[] = [];
+  categories: string[] = [];
+
+  get filter(): Filter {
+    return this.filterObject;
+  }
 }

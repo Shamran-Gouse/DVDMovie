@@ -54,7 +54,8 @@ namespace DVDMovie.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<Movie> GetMovies(string category, string search, bool related = false)
+        public IActionResult GetMovies(string category, string search,
+                                            bool related = false, bool metadata = false)
         {
             IQueryable<Movie> query = context.Movies;
             if (!string.IsNullOrWhiteSpace(category))
@@ -84,12 +85,21 @@ namespace DVDMovie.Controllers
                         m.Ratings.ForEach(r => r.Movie = null);
                     }
                 });
-                return data;
+                return metadata ? CreateMetadata(data) : Ok(data);
             }
             else
             {
-                return query;
+                return metadata ? CreateMetadata(query) : Ok(query);
             }
+        }
+        private IActionResult CreateMetadata(IEnumerable<Movie> movies)
+        {
+            return Ok(new
+            {
+                data = movies,
+                categories = context.Movies.Select(m => m.Category)
+            .Distinct().OrderBy(m => m)
+            });
         }
 
         [HttpPost]
@@ -111,7 +121,6 @@ namespace DVDMovie.Controllers
                 return BadRequest(ModelState);
             }
         }
-
         [HttpPut("{id}")]
         public IActionResult ReplaceMovie(long id, [FromBody] MovieData mData)
         {
@@ -134,7 +143,8 @@ namespace DVDMovie.Controllers
         }
 
         [HttpPatch("{id}")]
-        public IActionResult UpdateMovie(long id, [FromBody]JsonPatchDocument<MovieData> patch)
+        public IActionResult UpdateMovie(long id,
+           [FromBody]JsonPatchDocument<MovieData> patch)
         {
             Movie movie = context.Movies
             .Include(m => m.Studio)
@@ -163,5 +173,6 @@ namespace DVDMovie.Controllers
             context.SaveChanges();
             return Ok(id);
         }
+
     }
 }
