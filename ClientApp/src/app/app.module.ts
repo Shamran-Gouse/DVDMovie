@@ -1,3 +1,4 @@
+import { RoutingConfig } from './app.routing';
 import { MovieDetailComponent } from './structure/movieDetail.component';
 import { CategoryFilterComponent } from './structure/categoryFilter.component';
 import { BrowserModule } from '@angular/platform-browser';
@@ -16,6 +17,7 @@ import { MovieTableComponent } from './structure/movieTable.component';
     MovieDetailComponent
   ],
   imports: [
+    RoutingConfig,
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
     HttpClientModule,
     ModelModule,
