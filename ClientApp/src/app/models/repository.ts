@@ -105,6 +105,14 @@ export class Repository {
       });
   }
 
+  storeSessionData(dataType: string, data: any) {
+    return this.http.post("/api/session/" + dataType, data)
+      .subscribe(response => { });
+  }
+
+  getSessionData(dataType: string): any {
+    return this.http.get("/api/session/" + dataType);
+  }
 
 
 

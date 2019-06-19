@@ -27,12 +27,13 @@ namespace DVDMovie
                 options.UseSqlServer(Configuration
                     ["Data:Movies:ConnectionString"]));
 
-             services.AddMvc().AddJsonOptions(opts =>{
-                		opts.SerializerSettings.ReferenceLoopHandling
-                   		 	= ReferenceLoopHandling.Serialize;
-                        opts.SerializerSettings.NullValueHandling 
-                            = NullValueHandling.Ignore;
-                });
+            services.AddMvc().AddJsonOptions(opts =>
+            {
+                opts.SerializerSettings.ReferenceLoopHandling
+                        = ReferenceLoopHandling.Serialize;
+                opts.SerializerSettings.NullValueHandling
+                    = NullValueHandling.Ignore;
+            });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
@@ -40,6 +41,22 @@ namespace DVDMovie
             services.AddSpaStaticFiles(configuration =>
             {
                 configuration.RootPath = "ClientApp/dist";
+            });
+
+            // Added for handling sessions
+            services.AddDistributedSqlServerCache(options =>
+            {
+                options.ConnectionString = Configuration["Data:Movies:ConnectionString"];
+                options.SchemaName = "dbo";
+                options.TableName = "SessionData";
+            });
+
+            // Added for handling sessions
+            services.AddSession(options =>
+            {
+                options.Cookie.Name = "DVDMovie.Session";
+                options.IdleTimeout = System.TimeSpan.FromHours(48);
+                options.Cookie.HttpOnly = false;
             });
         }
 
@@ -60,6 +77,8 @@ namespace DVDMovie
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
+
+            app.UseSession();       // Added for handling sessions
 
             app.UseMvc(routes =>
             {
